@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![SQLite-vec](https://img.shields.io/badge/Vector%20DB-SQLite--vec-orange)](https://github.com/asg017/sqlite-vec)
 
-A sophisticated **Retrieval Augmented Generation (RAG)** system built with Go, featuring intelligent adaptive chunking, hierarchical document processing, semantic search, and flexible LLM integration.
+A sophisticated **Retrieval Augmented Generation (RAG)** system built with Go, featuring intelligent adaptive chunking, hierarchical document processing, semantic search, flexible LLM integration, and command-line configuration management.
 
 ## ✨ Key Features
 
@@ -34,6 +34,8 @@ A sophisticated **Retrieval Augmented Generation (RAG)** system built with Go, f
 - **Dimension Auto-Detection**: Automatic model compatibility
 - **RESTful API**: Clean, well-documented endpoints
 - **External LLM Support**: Use any OpenAI-compatible service
+- **Command-Line Interface**: Flexible configuration with CLI arguments
+- **Cross-Platform Builds**: Single build script for all platforms
 
 ## 🏗️ Architecture
 
@@ -70,7 +72,16 @@ cd go-rag
 go mod tidy
 ```
 
-### 2. Configure
+### 2. Build (Optional but Recommended)
+```bash
+# Quick build for current platform
+go build -ldflags="-s -w" -o rag-server .
+
+# Or build for all platforms
+chmod +x build.sh && ./build.sh
+```
+
+### 3. Configure
 Create `config.json`:
 ```json
 {
@@ -83,7 +94,7 @@ Create `config.json`:
 }
 ```
 
-### 3. Start Embedding Server
+### 4. Start Embedding Server
 ```bash
 # Example with llama.cpp
 ./server -m your-model.gguf --host 0.0.0.0 --port 8091
@@ -95,12 +106,32 @@ Create `config.json`:
 ollama serve
 ```
 
-### 4. Run the Application
+### 5. Run the Application
+
+#### Development Mode
 ```bash
 go run main.go
 ```
 
-🎉 Server starts on `http://localhost:8080`
+#### Build & Run (Recommended)
+```bash
+# Build optimized executable
+go build -ldflags="-s -w" -o rag-server .
+
+# Run with default config
+./rag-server
+
+# Run with custom config
+./rag-server -config=production.json
+
+# Show help and options
+./rag-server -help
+
+# Show version
+./rag-server -version
+```
+
+🎉 Server starts on `http://localhost:8080` (or configured port)
 
 ## 📚 Usage Examples
 
@@ -244,6 +275,116 @@ go-rag/
 - **`core/vector_db.go`**: SQLite-vec integration
 - **`core/rag_service.go`**: RAG pipeline orchestration
 - **`api/handlers.go`**: HTTP API handlers
+
+## 🚀 Building & Deployment
+
+### Command-Line Options
+The application supports flexible configuration through command-line arguments:
+
+```bash
+Usage: ./rag-server [options]
+
+Options:
+  -config string
+        Path to configuration file (default "config.json")
+  -help
+        Show help information
+  -version
+        Show version information
+
+Examples:
+  ./rag-server                           # Use default config.json
+  ./rag-server -config=prod.json         # Use custom config file
+  ./rag-server -config=/path/to/config   # Use absolute path
+  ./rag-server -help                     # Show help
+  ./rag-server -version                  # Show version
+```
+
+### Build Options
+
+#### Single Platform Build
+```bash
+# Development build
+go build -o rag-server .
+
+# Optimized production build
+go build -ldflags="-s -w" -o rag-server .
+```
+
+#### Cross-Platform Build
+```bash
+# Use provided build script for all platforms
+chmod +x build.sh
+./build.sh
+
+# Manual cross-compilation (note: CGO required for sqlite-vec)
+CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o rag-server-linux .
+CGO_ENABLED=1 GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o rag-server.exe .
+CGO_ENABLED=1 GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w" -o rag-server-macos-arm64 .
+```
+
+> **⚠️ Note**: Cross-platform builds require appropriate CGO toolchains for each target platform due to sqlite-vec dependency. Build script will attempt all platforms but may fail for platforms without proper CGO setup.
+
+### Deployment Configurations
+
+#### Development
+```json
+{
+  "server_port": "8080",
+  "llamacpp_base_url": "http://localhost:8091/v1",
+  "embedding_model": "nomic-embed-text-v1.5",
+  "chat_model": "qwen3:8b",
+  "vector_db_path": "./rag_database.db",
+  "default_top_k": 3
+}
+```
+
+#### Production
+```json
+{
+  "server_port": "80",
+  "llamacpp_base_url": "https://your-llm-api.com/v1",
+  "embedding_model": "text-embedding-ada-002",
+  "chat_model": "gpt-4",
+  "vector_db_path": "/data/rag_database.db",
+  "default_top_k": 5
+}
+```
+
+### Docker Deployment (Optional)
+```dockerfile
+FROM golang:1.23-alpine AS builder
+RUN apk add --no-cache gcc musl-dev sqlite-dev
+WORKDIR /app
+COPY . .
+RUN CGO_ENABLED=1 go build -ldflags="-s -w" -o rag-server .
+
+FROM alpine:latest
+RUN apk --no-cache add ca-certificates sqlite
+WORKDIR /root/
+COPY --from=builder /app/rag-server .
+COPY configs/ ./configs/
+EXPOSE 8080
+CMD ["./rag-server", "-config=configs/production.json"]
+```
+
+```bash
+# Build and run with custom config
+docker build -t rag-server .
+docker run -p 8080:8080 -v $(pwd)/data:/data rag-server ./rag-server -config=/data/custom.json
+```
+
+### Environment-Specific Deployments
+```bash
+# Development
+./rag-server -config=configs/dev.json
+
+# Staging
+./rag-server -config=configs/staging.json
+
+# Production
+./rag-server -config=configs/production.json
+```
 
 ## 🤝 Contributing
 

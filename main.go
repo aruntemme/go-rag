@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"os"
 	"os/signal"
@@ -10,9 +11,41 @@ import (
 )
 
 func main() {
+	// Define command-line flags
+	configPath := flag.String("config", "config.json", "Path to configuration file")
+	showHelp := flag.Bool("help", false, "Show help information")
+	showVersion := flag.Bool("version", false, "Show version information")
+
+	// Custom usage function
+	flag.Usage = func() {
+		log.Printf("Usage: %s [options]\n", os.Args[0])
+		log.Println("\nRAG Go Application - Advanced Document Search & Analysis Server")
+		log.Println("\nOptions:")
+		flag.PrintDefaults()
+		log.Println("\nExamples:")
+		log.Printf("  %s                           # Use default config.json\n", os.Args[0])
+		log.Printf("  %s -config=prod.json         # Use custom config file\n", os.Args[0])
+		log.Printf("  %s -help                     # Show this help\n", os.Args[0])
+	}
+
+	flag.Parse()
+
+	// Handle help and version flags
+	if *showHelp {
+		flag.Usage()
+		os.Exit(0)
+	}
+
+	if *showVersion {
+		log.Println("RAG Go Application v1.0.0")
+		log.Println("Advanced Document Search & Analysis Server")
+		os.Exit(0)
+	}
+
 	// Load configuration
-	config.LoadConfig("config.json")
-	log.Printf("Configuration loaded: Server will run on port %s", config.AppConfig.ServerPort)
+	config.LoadConfig(*configPath)
+	log.Printf("Configuration loaded from: %s", *configPath)
+	log.Printf("Server will run on port %s", config.AppConfig.ServerPort)
 	log.Printf("Vector DB path: %s", config.AppConfig.VectorDBPath)
 	log.Printf("LlamaCPP Base URL: %s", config.AppConfig.LlamaCPPBaseURL)
 

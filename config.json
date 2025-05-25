@@ -2,7 +2,7 @@
     "server_port": "8080",
     "llamacpp_base_url": "http://localhost:8091/v1",
     "embedding_model": "mxbai-embed-large:large", 
-    "chat_model": "qwen3:8b", 
+    "chat_model": "gemma3:4b", 
     "vector_db_path": "./rag_database.db",
     "default_top_k": 3
-}
+} 
