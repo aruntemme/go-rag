@@ -65,7 +65,7 @@ A sophisticated **Retrieval Augmented Generation (RAG)** system built with Go, f
 
 ### 1. Clone & Install
 ```bash
-git clone https://github.com/your-username/go-rag.git
+git clone https://github.com/aruntemme/go-rag.git
 cd go-rag
 go mod tidy
 ```
@@ -266,8 +266,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support
 
 - 📖 **Documentation**: Check [API_REFERENCE.md](API_REFERENCE.md)
-- 🐛 **Issues**: [GitHub Issues](https://github.com/your-username/go-rag/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/your-username/go-rag/discussions)
+- 🐛 **Issues**: [GitHub Issues](https://github.com/aruntemme/go-rag/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/aruntemme/go-rag/discussions)
 
 ---
 
